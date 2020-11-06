@@ -9,6 +9,12 @@ class _InputPageState extends State<InputPage> {
 
   String _nombre = '';
   String _email = '';
+  String _fecha = '';
+  String _opcionesSeleccionada = 'Volar';
+
+  List<String> _poderes = ['Volar', 'Rayos', 'Super Aliento', 'Super Fuerza'];
+
+  TextEditingController _inputFieldDateController = new TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -24,6 +30,10 @@ class _InputPageState extends State<InputPage> {
           _crearEmail(),
           Divider(),
           _crearPassword(),
+          Divider(),
+          _crearFecha( context ),
+          Divider(),
+          _crearDropdown(),
           Divider(),
           _crearPersona()
         ],
@@ -93,10 +103,91 @@ class _InputPageState extends State<InputPage> {
     );
   }
 
+
+  Widget _crearFecha( BuildContext context ){
+    return TextField(
+      enableInteractiveSelection: false,
+      controller: _inputFieldDateController,
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20.0)
+        ),
+        hintText: 'Fecha de nacimiento',
+        labelText: 'Fecha de nacimiento',
+        suffixIcon: Icon( Icons.calendar_today ),
+        icon: Icon( Icons.calendar_today )
+      ),
+      onTap: (){
+
+        FocusScope.of(context).requestFocus(new FocusNode());
+        _selectDate( context );
+
+      },
+    );
+  }
+
+  _selectDate( BuildContext context ) async{
+
+    DateTime picked = await showDatePicker(
+      context: context,
+      initialDate: new DateTime.now(),
+      firstDate: new DateTime(1999),
+      lastDate: new DateTime(2021),
+      locale: Locale('es', 'ES')
+    );
+    if ( picked != null) {
+      setState(() {
+        _fecha = picked.toString();
+        _inputFieldDateController.text = _fecha;
+      });
+    }
+  }
+
+  List<DropdownMenuItem<String>> getOpcionesDropdown() {
+
+    List<DropdownMenuItem<String>> lista = new List();
+
+    _poderes.forEach((poder) {
+      lista.add( DropdownMenuItem(
+        child: Text(poder),
+        value: poder,
+      ));
+    });
+
+    return lista;
+  }
+
+  Widget _crearDropdown(){
+
+    return Row(
+      children: [
+        Icon( Icons.select_all ),
+        SizedBox(width: 30.0),
+        Expanded(
+          child: DropdownButton(
+          value: _opcionesSeleccionada,
+          items: getOpcionesDropdown(), 
+            onChanged: (opt){
+                setState(() {
+                print(opt);
+                _opcionesSeleccionada = opt;
+              });
+            },
+          ),
+        ),
+      ],
+    );
+    
+    
+    
+
+  }
+
   Widget _crearPersona(){
     return ListTile(
       title: Text('Nombre es: $_nombre'),
       subtitle: Text('Email: $_email'),
+      trailing: Text(_opcionesSeleccionada),
     );
   }
 }
